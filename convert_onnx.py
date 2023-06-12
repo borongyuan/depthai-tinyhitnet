@@ -14,8 +14,8 @@ class Model(pl.LightningModule):
         self.model = hit_net_sf.HITNet_SF()
 
     def forward(self, left, right):
-        left = left * 2 - 1
-        right = right * 2 - 1
+        left = torch.cat((left, left, left), 1)
+        right = torch.cat((right, right, right), 1)
         return self.model(left, right)
 
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     model = Model(**vars(args)).eval()
     model.load_state_dict(torch.load(args.ckpt)["state_dict"])
 
-    X = torch.randn(1, 3, H, W)
+    X = torch.randn(1, 1, H, W)
     # torch_out = model(X, X)
     onnx_filename = os.path.join(output_dir, "tinyhitnet_{}x{}.onnx".format(H, W))
 
