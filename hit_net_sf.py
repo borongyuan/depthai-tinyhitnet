@@ -157,13 +157,13 @@ def warp_and_aggregate(hyp, left, right):
     cost = [torch.sum(torch.abs(left), dim=1, keepdim=True)]
     for offset in [1, 0, -1]:
         index_float = d_range + offset
-        index_long = torch.floor(index_float).long()
+        index_long = torch.floor(index_float)
         index_left = torch.clip(index_long, min=0, max=right.size(3) - 1)
         index_right = torch.clip(index_long + 1, min=0, max=right.size(3) - 1)
         index_weight = index_float - index_left
 
-        right_warp_left = torch.gather(right, dim=-1, index=index_left.long())
-        right_warp_right = torch.gather(right, dim=-1, index=index_right.long())
+        right_warp_left = torch.gather(right, dim=3, index=index_left.long())
+        right_warp_right = torch.gather(right, dim=3, index=index_right.long())
         right_warp = right_warp_left + index_weight * (
             right_warp_right - right_warp_left
         )
@@ -205,7 +205,7 @@ def make_cost_volume_v2(left, right, max_disp):
         right.size(0), right.size(1), 1, right.size(2), 1
     )
     right = torch.gather(
-        right.unsqueeze(2).repeat(1, 1, max_disp, 1, 1), dim=-1, index=x_index
+        right.unsqueeze(2).repeat(1, 1, max_disp, 1, 1), dim=4, index=x_index
     )
 
     return left.unsqueeze(2) - right
